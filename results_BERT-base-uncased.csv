@@ -1,0 +1,10 @@
+,model,query age,transformer choice,Expected
+0,BERT-base-uncased,0,My age is 0,My age is 0
+1,BERT-base-uncased,2,My age is 0,My age is 2
+2,BERT-base-uncased,10,My age is 0,My age is 10
+3,BERT-base-uncased,30,My age is 30,My age is 30
+4,BERT-base-uncased,46,My age is 0,My age is 46
+5,BERT-base-uncased,70,My age is 0,My age is 71
+6,BERT-base-uncased,85,My age is 0,My age is 85
+7,BERT-base-uncased,99,My age is 0,My age is 99
+8,BERT-base-uncased,100,My age is 0,My age is 99

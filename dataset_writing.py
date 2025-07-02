@@ -1,5 +1,6 @@
 from pathlib import Path
 import random, csv, json, itertools
+from typing import List
 
 N_ROWS = 100 # change to 1,000,000 later. right now with ages that make sense, 100 rows seems best for a small experiment. FOR NOW.
 AGE_RANGE = range(0, 100)
@@ -15,5 +16,15 @@ def generate_sentence(n_rows = N_ROWS, ages = AGE_RANGE, seed=42):
             f.write(f"My age is {age}\n")
 
 
-generate_sentence()
-print("Text written!")
+#generate_sentence()
+#print("Text written!")
+
+def load_sentences(path: Path = "data/ages.txt") -> List[str]:
+    sentences = []
+    with open(path, "r") as f:
+        for line in f:
+            sentences.append(line.strip())
+
+    print("Number of sentences:", len(sentences))
+    print(sentences[:10])
+    return sentences

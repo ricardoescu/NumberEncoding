@@ -19,7 +19,7 @@ def generate_sentence(n_rows = N_ROWS, ages = AGE_RANGE, seed=42):
 #generate_sentence()
 #print("Text written!")
 
-def load_sentences(path: Path = "data/ages.txt") -> List[str]:
+def load_sentences(path: Path) -> List[str]:
     sentences = []
     with open(path, "r") as f:
         for line in f:

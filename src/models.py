@@ -2,7 +2,7 @@ from sentence_transformers import SentenceTransformer, util
 import numpy as np
 from typing import List
 
-class SentenceEncoder(SentenceTransformer):
+class SentenceEncoder():
     def __init__(self, model_name: str):
         self.model = SentenceTransformer(model_name)
 

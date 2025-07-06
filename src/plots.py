@@ -4,8 +4,10 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from typing import List, Tuple
 from metrics import failproof
+import seaborn as sns
+import pandas as pd
 
-def plot_tsne(query: int, sentences: List[str], encoder, pca_dims: int, perp: int, tsne_dimensions:int = 2):
+def plot_tsne(model_name, out_folder, query: int, sentences: List[str], encoder, pca_dims: int, perp: int, tsne_dimensions:int = 2):
     emb_query = encoder.embed([str(query)][0])
     emb_sentences = encoder.embed(sentences)
 
@@ -40,18 +42,156 @@ def plot_tsne(query: int, sentences: List[str], encoder, pca_dims: int, perp: in
     plt.scatter(*best_coords, marker='s', s=120, label=f"true best={true_age}")
     plt.legend()
 
-    plt.title(f"t-SNE projection")
+    plt.title(f"{model_name} t-SNE projection")
     plt.xlabel("TSNE-1")
     plt.ylabel("TSNE-2")
     plt.tight_layout()
+
+    filename = f"tsne_{model_name}_{query}.png"
+    plt.savefig(out_folder / filename)
+
     plt.show()
 
-def plot_concentration(ages, preds, errors):
+def plot_concentration(model_name, out_folder, ages, preds, errors):
     plt.figure(figsize=(6,6))
     sc = plt.scatter(ages, preds, c=errors, cmap='coolwarm', s=30)
     plt.plot([min(ages), max(ages)], [min(ages), max(ages)])
     plt.colorbar(sc, label='|pred - true|')
     plt.xlabel("True age")
     plt.ylabel("Predicted age")
-    plt.title("Predicted vs True ages")
+    plt.title(f"{model_name}: Preds vs True ages")
+
+    filename = f"concentration_{model_name}.png"
+    plt.savefig(out_folder / filename)
+
+    plt.show()
+
+
+def heatmap(results, model_name, out_folder):
+    df = pd.DataFrame({
+        "true": results["true"],
+        "pred": results["pred"]
+    })
+
+    # Define bins.
+    # Grouped by 5 or 10 years gives great interpretability,
+    # but can also be good for visualising +-2 years, or as required.
+    year_bins = 10
+    bins = list(range(0, 101, year_bins))
+    labels = [f"{i:02d}–{i + 9:02d}" for i in bins[:-1]]  # ["00–09", "10–19", …, "90–99"]
+
+    # Bin both true and pred
+    df["true_bin"] = pd.cut(df.true, bins=bins, labels=labels, right=False)
+    df["pred_bin"] = pd.cut(df.pred, bins=bins, labels=labels, right=False)
+
+    # Pivot to get counts per (true_bin × pred_bin)
+    heat = df.pivot_table(
+        index="true_bin",
+        columns="pred_bin",
+        aggfunc="size",
+        fill_value=0
+    )
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(
+        heat,
+        annot=True,  # show counts in each cell
+        fmt="d",  # integer format
+        cmap="Blues",
+        cbar_kws={"label": "Count"}
+    )
+    plt.xlabel("Predicted age bin")
+    plt.ylabel("True age bin")
+    plt.title(f"{model_name}: True vs Predicted Age (10-year bins)")
+    plt.tight_layout()
+
+    filename = f"heatmap_{model_name}_{year_bins}.png"
+    plt.savefig(out_folder / filename)
+
+    plt.show()
+
+
+def plot_concentration_color_gradient(results, model_name, out_folder):
+    """
+    Scatter plot: colour encodes the *true* age (0‒99) on a single gradient,
+    marker size encodes absolute error.
+    """
+
+    cmap = "plasma"
+    figsize = (6, 6)
+
+    true = results["true"]
+    preds = results["pred"]
+    errors = results["errors"]
+
+    true_arr = np.array(true)
+    pred_arr = np.array(preds)
+    err_arr = np.array(errors)
+
+    # Changing sizes with how big the error is for better representation while maintaining the color gradient asked for.
+    sizes = 30 + err_arr * 10  # 0 error -> size 30, 10 error -> size 130
+
+    plt.figure(figsize=figsize)
+    sc = plt.scatter(true_arr, pred_arr,
+                     c=true_arr,  # colour = true age
+                     s=sizes,
+                     cmap=cmap,
+                     alpha=0.8,
+                     edgecolors="none")
+
+    # perfect-prediction line
+    # not entirely sure if this is necessary. Might remove.
+    plt.plot([0, 99], [0, 99], linestyle="--", color="grey", linewidth=1)
+
+    # colorbar shows age scale
+    cbar = plt.colorbar(sc)
+    cbar.set_label("True age")
+
+    plt.xlabel("True age")
+    plt.ylabel("Predicted age")
+    plt.title("Age-prediction dispersion (colour = true age, size = error)")
+    plt.tight_layout()
+
+    filename = f"concentration-color_gradient{model_name}.png"
+    plt.savefig(out_folder / filename)
+
+    plt.show()
+
+def plot_prediction_histogram(pred_ages, bins=range(0, 101, 5), model_name="", out_folder=""):
+    """
+    Histogram of predicted ages.
+    """
+    plt.figure(figsize=(8,4))
+    plt.hist(pred_ages, bins=bins, edgecolor="black")
+    plt.xlabel("Predicted age")
+    plt.ylabel("Count")
+    plt.title("Distribution of predicted ages")
+    plt.tight_layout()
+
+    filename = f"{model_name}_prediction_histogram.png"
+    plt.savefig(out_folder / filename)
+
+    plt.show()
+
+def plot_error_histogram(errors, model_name, out_dir, absolute=True):
+    """
+    Histogram of absolute errors |pred–true|.
+    Modify to total error?
+    """
+
+    bins = range(min(errors), max(errors)+2, 10)
+    plt.figure(figsize=(6,4))
+    plt.hist(errors, bins=bins, edgecolor="black", align="left")
+    if absolute:
+        xlab = "Absolute Error"
+    else:
+        xlab = "Error"
+    plt.xlabel(xlab)
+    plt.ylabel("Count")
+    plt.title("Error distribution")
+    plt.xticks(bins)
+    plt.tight_layout()
+
+    filename = f"{model_name}_histogram_{xlab}.png"
+    plt.savefig(out_dir / filename)
+
     plt.show()

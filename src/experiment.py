@@ -17,14 +17,16 @@ def run_experiment(encoder, sentences, ages: range) -> dict:
         true_ages.append(true)
         pred_ages.append(pred)
 
-    errors, correct, accuracy = compute_errors(true_ages, pred_ages)
+    errors, correct, accuracy, non_abs_errors, exact_match_accuracy = compute_errors(true_ages, pred_ages)
 
     results = {
         "true": true_ages,
         "pred": pred_ages,
         "errors": errors,
         "correct": correct,
-        "accuracy": accuracy
+        "accuracy": accuracy,
+        "full_error": non_abs_errors,
+        "exact_match_acc": exact_match_accuracy
     }
 
     return results

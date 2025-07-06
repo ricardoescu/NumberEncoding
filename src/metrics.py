@@ -8,7 +8,12 @@ def failproof(query_age: int, sentences):
     return ages[index], index
 
 def compute_errors(true: List[int], predicted: List[int], acceptable_range=2):
-    errors = [abs(t-p) for t,p in zip(true, predicted)]
+    non_abs_errors = [(t-p) for t,p in zip(true, predicted)]
+    errors = [abs(e) for e in non_abs_errors]
     correct = [e <= acceptable_range for e in errors]
+    exact = [e == 0 for e in errors]
     accuracy = sum(correct) / len(true)
-    return errors, correct, accuracy
+    exact_match_accuracy = sum(exact) / len(true)
+
+
+    return errors, correct, accuracy, non_abs_errors, exact_match_accuracy

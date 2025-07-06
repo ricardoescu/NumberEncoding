@@ -1,17 +1,13 @@
-from typing import List
-from pathlib import Path
-import numpy as np
 
-from dataset_writing import load_sentences, generate_sentence
-from models import SentenceEncoder
-from metrics import failproof, compute_errors
+from metrics import _parse_age, failproof, compute_errors
 
 def run_experiment(encoder, sentences, ages: range) -> dict:
 
     true_ages, pred_ages = [], []
     for q in ages:
         model_index = encoder.find_best_index(q, sentences)
-        pred = int(sentences[model_index].split()[-1])
+        #pred = int(sentences[model_index].split()[-1])
+        pred = _parse_age(sentences[model_index])
         true, true_index = failproof(q, sentences)
 
         true_ages.append(true)

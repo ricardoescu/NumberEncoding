@@ -1,0 +1,2 @@
+model,accuracy,exact_match_acc
+all-MiniLM-L6-v2,0.79,0.67

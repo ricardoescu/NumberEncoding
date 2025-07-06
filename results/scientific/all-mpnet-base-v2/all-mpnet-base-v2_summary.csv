@@ -1,0 +1,2 @@
+model,accuracy,exact_match_acc
+all-mpnet-base-v2,0.26,0.07

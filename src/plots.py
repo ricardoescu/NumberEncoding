@@ -3,19 +3,28 @@ import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from typing import List, Tuple
-from metrics import failproof
+from metrics import failproof, _parse_age
 import seaborn as sns
 import pandas as pd
 
+
 def plot_tsne(model_name, out_folder, query: int, sentences: List[str], encoder, pca_dims: int, perp: int, tsne_dimensions:int = 2):
+    query_text = f"My age is {query}"
+    numbers = list(range(100))
+    s_numbers = [str(i) for i in numbers]
+    emb_nums = encoder.embed(s_numbers)
+
     emb_query = encoder.embed([str(query)][0])
+    #emb_query = encoder.embed(query_text)
+    num_sentence = [str(_parse_age(s)) for s in sentences]
     emb_sentences = encoder.embed(sentences)
+    #emb_sentences = encoder.embed(num_sentence)
 
     model_index = encoder.find_best_index(query, sentences)
     true_age, true_index = failproof(query, sentences)
 
 
-    all_embeddings = np.vstack([emb_query, emb_sentences, emb_sentences[true_index: true_index+1]])
+    all_embeddings = np.vstack([emb_query, emb_sentences, emb_sentences[true_index: true_index+1], emb_nums])
 
     # Apply dimensionality reduction (optional, as it does not take that much time)
     # Important to note! Models such as RoBERTa did take long. Gotta look more into if this actually makes it considerably better
@@ -25,21 +34,31 @@ def plot_tsne(model_name, out_folder, query: int, sentences: List[str], encoder,
 
     # Ensuring that perplexity is always within the limits of the shape.
     perplexity = min(perp, pca_transformed.shape[0]-1)
+    #perplexity = min(perp, all_embeddings.shape[0] - 1)
 
     tsne = TSNE(n_components=tsne_dimensions, perplexity=perplexity, random_state=42) # I think specifying the random state helps for replicability? I need to check again.
-    coords = tsne.fit_transform(all_embeddings)
+    coords = tsne.fit_transform(pca_transformed)
+    #coords = tsne.fit_transform(all_embeddings)
 
     query_coord = coords[0]
-    sentence_coords = coords[1:]
-    best_coords = coords[-1]
+    sentence_coords = coords[1:1 + len(sentences)]
+    best_coords = coords[1 + len(sentences)]
+    all_num_coords = coords[1+len(sentences)+1:]
+
+    ages = [_parse_age(s) for s in sentences]
 
     plt.figure(figsize=(6, 6))
     # plot all sentences
 
-    plt.scatter(sentence_coords[:, 0], sentence_coords[:, 1], marker='o', alpha=0.6)
-    plt.scatter(*query_coord, marker='^', s=100, label=f"query={query}")
-    plt.scatter(*sentence_coords[model_index], marker='X', s=120, label=f"model best={sentences[model_index].split()[-1]}")
-    plt.scatter(*best_coords, marker='s', s=120, label=f"true best={true_age}")
+    sc1 = plt.scatter(sentence_coords[:, 0], sentence_coords[:, 1], c=ages, cmap='Blues', s=30, alpha=0.8, label='Sentences')
+    plt.colorbar(sc1, label='sentence age')
+
+    sc2 = plt.scatter(all_num_coords[:, 0], all_num_coords[:, 1], c=numbers, cmap='OrRd', s=20, alpha=0.6, marker=".", label='Numbers')
+    plt.colorbar(sc2, label='Number values')
+
+    plt.scatter(*query_coord, marker='^', s=100, color='black', label=f"query={query}")
+    plt.scatter(*sentence_coords[model_index], marker='X', s=120, color='red', label=f"model best={sentences[model_index].split()[-1]}")
+    plt.scatter(*best_coords, marker='s', s=120, color='green', label=f"true best={true_age}")
     plt.legend()
 
     plt.title(f"{model_name} t-SNE projection")

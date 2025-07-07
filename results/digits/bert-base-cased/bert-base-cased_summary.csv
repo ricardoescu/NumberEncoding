@@ -1,2 +1,2 @@
 model,accuracy,exact_match_acc
-bert-base-cased,0.04,0.02
+bert-base-cased,0.11,0.05

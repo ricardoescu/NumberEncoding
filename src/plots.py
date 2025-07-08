@@ -20,7 +20,7 @@ def plot_tsne(model_name, out_folder, query: int, sentences: List[str], encoder,
     emb_sentences = encoder.embed(sentences)
     #emb_sentences = encoder.embed(num_sentence)
 
-    model_index = encoder.find_best_index(query, sentences)
+    model_index = encoder.find_best_index(query, emb_sentences)
     true_age, true_index = failproof(query, sentences)
 
 

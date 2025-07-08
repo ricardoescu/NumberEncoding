@@ -4,8 +4,9 @@ from metrics import _parse_age, failproof, compute_errors
 def run_experiment(encoder, sentences, ages: range) -> dict:
 
     true_ages, pred_ages = [], []
+    corpus_embedding = encoder.embed(sentences)
     for q in ages:
-        model_index = encoder.find_best_index(q, sentences)
+        model_index = encoder.find_best_index(q, corpus_embedding)
         #pred = int(sentences[model_index].split()[-1])
         pred = _parse_age(sentences[model_index])
         true, true_index = failproof(q, sentences)

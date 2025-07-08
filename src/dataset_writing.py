@@ -61,3 +61,35 @@ def generate_sentences(out_path, n_rows=N_ROWS, ages=AGE_RANGE, seed=42, style="
             f.write(sentence + "\n")
 
     print("file written to: ", out_path)
+
+
+import ast
+import pandas as pd
+def clean_raw_data():
+    RAW_PATH = Path("../data/data.csv")
+    CLEANED_PATH = Path("../data/cleaned_data.csv")
+
+    df_raw = pd.read_csv(RAW_PATH, header=0, index_col=0, names=["attributes_raw"])
+
+    df_raw["attributes"] = df_raw["attributes_raw"].apply(ast.literal_eval)
+    df = pd.DataFrame(df_raw["attributes"].tolist())
+
+
+    CLEANED_PATH.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(CLEANED_PATH, index=False)
+    print(f"Wrote cleaned dataset to {CLEANED_PATH}")
+
+clean_raw_data()
+
+
+def load_bigger_dataset(path: Path) -> List[str]:
+    sentences = []
+    with path.open(newline="") as f:
+        reader = csv.reader(f)
+        next(reader, None)
+        for row in reader:
+            sentences.append(row[0])
+
+    print("Number of sentences:", len(sentences))
+    print(sentences[:10])
+    return sentences

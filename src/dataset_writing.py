@@ -2,6 +2,7 @@ from pathlib import Path
 import random, csv, json, itertools
 from typing import List, Callable, Tuple
 from num2words import num2words
+import ast
 
 
 N_ROWS = 100 # change to 1,000,000 later. right now with ages that make sense, 100 rows seems best for a small experiment. FOR NOW.
@@ -63,8 +64,6 @@ def generate_sentences(out_path, n_rows=N_ROWS, ages=AGE_RANGE, seed=42, style="
     print("file written to: ", out_path)
 
 
-import ast
-import pandas as pd
 def clean_raw_data():
     RAW_PATH = Path("../data/data.csv")
     CLEANED_PATH = Path("../data/cleaned_data.csv")
@@ -79,7 +78,7 @@ def clean_raw_data():
     df.to_csv(CLEANED_PATH, index=False)
     print(f"Wrote cleaned dataset to {CLEANED_PATH}")
 
-clean_raw_data()
+#clean_raw_data()
 
 
 def load_bigger_dataset(path: Path) -> List[str]:

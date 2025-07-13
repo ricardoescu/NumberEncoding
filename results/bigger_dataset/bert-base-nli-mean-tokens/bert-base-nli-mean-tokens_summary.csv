@@ -1,0 +1,2 @@
+model,accuracy,exact_match_acc
+bert-base-nli-mean-tokens,0.86,0.84

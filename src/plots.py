@@ -6,6 +6,7 @@ from typing import List, Tuple
 from metrics import failproof, _parse_age
 import seaborn as sns
 import pandas as pd
+from pathlib import Path
 
 
 def plot_tsne(model_name, out_folder, query: int, sentences: List[str], encoder, pca_dims: int, perp: int, tsne_dimensions:int = 2):
@@ -214,3 +215,51 @@ def plot_error_histogram(errors, model_name, out_dir, absolute=True):
     plt.savefig(out_dir / filename)
 
     plt.show()
+
+
+def results_summary(DATASETS, accuracy="accuracy"):
+
+    #DATASETS = {"digits", "float", "scientific", "words"}
+    #DATASETS = {"bigger_dataset"}
+    root = Path("../results")
+
+    VALID_MODELS = {
+        "all-MiniLM-L6-v2",
+        "all-mpnet-base-v2",
+        "bert-base-nli-mean-tokens",
+        "bert-base-uncased",
+        "bert-base-cased",
+        "all-roberta-large-v1",
+        "all-MiniLM-12-v2",
+        "intfloat/e5-small",
+        "princeton-nlp/unsup-simcse-bert-base-uncased",
+        "mathbert-base-uncased",
+    }
+
+    records = []
+
+    for f in root.rglob("*_summary.csv"):
+        # find the first parent folder that matches a known dataset
+        dataset_folder = next((p for p in f.parents if p.name in DATASETS), None)
+        if dataset_folder is None:
+            continue
+
+        dataset = dataset_folder.name
+        # everything *below* the dataset folder is the (possibly nested) model path
+        model_tag = f.parent.relative_to(dataset_folder).as_posix()  # keeps slashes
+
+        if VALID_MODELS and model_tag not in VALID_MODELS:
+            continue # ignore models outside the list
+
+        acc = pd.read_csv(f).loc[0, accuracy]
+        records.append({"model": model_tag, "dataset": dataset, "accuracy": acc})
+
+    overall = (pd.DataFrame(records)
+               .pivot_table(index="model",
+                            columns="dataset",
+                            values="accuracy",
+                            aggfunc="first")
+               .sort_index())
+
+    print(overall.to_markdown(floatfmt=".3f"))
+    overall.to_csv(root / "overall_summary.csv")

@@ -1,0 +1,5 @@
+model,bigger_dataset
+all-MiniLM-L6-v2,0.89
+bert-base-nli-mean-tokens,0.86
+intfloat/e5-small,0.86
+princeton-nlp/unsup-simcse-bert-base-uncased,0.8

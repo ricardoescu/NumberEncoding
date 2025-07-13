@@ -1,5 +1,9 @@
-model,bigger_dataset
-all-MiniLM-L6-v2,0.89
-bert-base-nli-mean-tokens,0.86
-intfloat/e5-small,0.86
-princeton-nlp/unsup-simcse-bert-base-uncased,0.8
+model,digits,float,words
+all-MiniLM-L6-v2,0.85,0.79,0.42
+all-mpnet-base-v2,0.11,0.3,0.17
+all-roberta-large-v1,0.18,0.36,0.23
+bert-base-cased,0.11,0.47,0.05
+bert-base-nli-mean-tokens,0.95,0.93,0.43
+bert-base-uncased,0.05,0.49,0.02
+intfloat/e5-small,0.83,0.77,0.39
+princeton-nlp/unsup-simcse-bert-base-uncased,0.9,0.9,0.43

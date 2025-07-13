@@ -9,7 +9,7 @@ import pandas as pd
 from pathlib import Path
 
 
-def plot_tsne(model_name, out_folder, query: int, sentences: List[str], encoder, pca_dims: int, perp: int, tsne_dimensions:int = 2):
+def plot_tsne(model_name, out_folder, query: int, sentences: List[str], encoder, pca_dims: int, perp: int, tsne_dimensions:int = 2, show_labels: bool = False):
     query_text = f"My age is {query}"
     numbers = list(range(100))
     s_numbers = [str(i) for i in numbers]
@@ -56,6 +56,14 @@ def plot_tsne(model_name, out_folder, query: int, sentences: List[str], encoder,
 
     sc2 = plt.scatter(all_num_coords[:, 0], all_num_coords[:, 1], c=numbers, cmap='OrRd', s=20, alpha=0.6, marker=".", label='Numbers')
     plt.colorbar(sc2, label='Number values')
+
+    if show_labels:
+        # label corpus sentence with their numeric age
+        for (x, y), age in zip(sentence_coords, ages):
+            plt.annotate(age, (x, y), textcoords="offset points", xytext=(2, 2), fontsize=6, color='navy')
+        # label the plain numbers 0-99
+        for (x, y), n in zip(all_num_coords, numbers):
+            plt.annotate(n, (x, y), textcoords="offset points", xytext=(2, 2), fontsize=6, color='darkred')
 
     plt.scatter(*query_coord, marker='^', s=100, color='black', label=f"query={query}")
     plt.scatter(*sentence_coords[model_index], marker='X', s=120, color='red', label=f"model best={sentences[model_index].split()[-1]}")
@@ -263,3 +271,40 @@ def results_summary(DATASETS, accuracy="accuracy"):
 
     print(overall.to_markdown(floatfmt=".3f"))
     overall.to_csv(root / "overall_summary.csv")
+
+def plot_line_2d(encoder, sentences, title_tag: str = "", label_points: bool = True, figsize=(7,7)):
+    numbers = list(range(100))
+    s_numbers = [str(i) for i in numbers]
+
+    emb_nums = encoder.embed(s_numbers)
+    emb_sentences = encoder.embed(sentences)
+
+    all_embeddings = np.vstack([emb_nums, emb_sentences])
+    xy = PCA(n_components=2, random_state=42).fit_transform(all_embeddings)
+
+    xy_nums = xy[:len(numbers)]
+    xy_sents = xy[len(numbers):]
+
+    plt.figure(figsize=figsize)
+    sc_nums = plt.scatter(xy_nums[:, 0],  xy_nums[:, 1],
+                           c=numbers, cmap="viridis", s=40,
+                           edgecolors="none", marker="o", label="Numerals")
+    sc_sents = plt.scatter(xy_sents[:, 0], xy_sents[:, 1],
+                           c="grey", alpha=0.15, s=12,
+                           edgecolors="none", marker=".")
+    plt.colorbar(sc_nums, label="Numeral value (0-99)")
+
+    plt.arrow(*xy_nums[0], *(xy_nums[-1] - xy_nums[0]),
+              width=0.002, head_width=0.05, color="red",
+              alpha=0.6, length_includes_head=True)
+
+    if label_points:
+        for (x, y), n in zip(xy_nums, numbers):
+            plt.annotate(str(n), (x, y), textcoords="offset points",
+                         xytext=(2, 2), fontsize=6, color="navy")
+
+    plt.title(f"{encoder.__class__.__name__} {title_tag} – PCA of numerals & sentences")
+    plt.xlabel("PC-1");
+    plt.ylabel("PC-2");
+    plt.tight_layout()
+    plt.show()

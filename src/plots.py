@@ -225,24 +225,11 @@ def plot_error_histogram(errors, model_name, out_dir, absolute=True):
     plt.show()
 
 
-def results_summary(DATASETS, accuracy="accuracy"):
+def results_summary(DATASETS, VALID_MODELS, accuracy="accuracy"):
 
     #DATASETS = {"digits", "float", "scientific", "words"}
     #DATASETS = {"bigger_dataset"}
     root = Path("../results")
-
-    VALID_MODELS = {
-        "all-MiniLM-L6-v2",
-        "all-mpnet-base-v2",
-        "bert-base-nli-mean-tokens",
-        "bert-base-uncased",
-        "bert-base-cased",
-        "all-roberta-large-v1",
-        "all-MiniLM-12-v2",
-        "intfloat/e5-small",
-        "princeton-nlp/unsup-simcse-bert-base-uncased",
-        "mathbert-base-uncased",
-    }
 
     records = []
 

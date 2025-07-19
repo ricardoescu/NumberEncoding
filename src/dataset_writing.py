@@ -3,6 +3,7 @@ import random, csv, json, itertools
 from typing import List, Callable, Tuple
 from num2words import num2words
 import ast
+import pandas as pd
 
 
 N_ROWS = 100 # change to 1,000,000 later. right now with ages that make sense, 100 rows seems best for a small experiment. FOR NOW.
@@ -87,7 +88,7 @@ def load_bigger_dataset(path: Path) -> List[str]:
         reader = csv.reader(f)
         next(reader, None)
         for row in reader:
-            sentences.append(row[0])
+            sentences.append(row[7])
 
     print("Number of sentences:", len(sentences))
     print(sentences[:10])

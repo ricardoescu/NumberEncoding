@@ -1,0 +1,2 @@
+model,accuracy,exact_match_acc
+all-MiniLM-L12-v2,0.8,0.62

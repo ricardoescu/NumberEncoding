@@ -1,0 +1,2 @@
+model,accuracy,exact_match_acc
+bert-plain-triplet,0.3,0.18

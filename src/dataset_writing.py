@@ -82,13 +82,13 @@ def clean_raw_data():
 #clean_raw_data()
 
 
-def load_bigger_dataset(path: Path) -> List[str]:
+def load_bigger_dataset(path: Path, row_num) -> List[str]:
     sentences = []
     with path.open(newline="") as f:
         reader = csv.reader(f)
         next(reader, None)
         for row in reader:
-            sentences.append(row[7])
+            sentences.append(row[row_num])
 
     print("Number of sentences:", len(sentences))
     print(sentences[:10])

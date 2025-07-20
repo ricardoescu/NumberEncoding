@@ -1,0 +1,2 @@
+model,accuracy,exact_match_acc
+princeton-nlp/unsup-simcse-bert-base-uncased,0.51,0.26

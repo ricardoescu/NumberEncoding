@@ -1,0 +1,2 @@
+model,accuracy,exact_match_acc
+bert-MNRL,0.76,0.76

@@ -1,0 +1,2 @@
+model,accuracy,exact_match_acc
+bert_MNRL_digits+full,0.77,0.76

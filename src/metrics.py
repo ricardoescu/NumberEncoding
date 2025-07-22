@@ -3,7 +3,6 @@ from typing import List, Tuple
 import re
 from word2number import w2n
 
-
 def _parse_age(sentence: str) -> int:
     """
     Grab the first integer if present, else convert to int.

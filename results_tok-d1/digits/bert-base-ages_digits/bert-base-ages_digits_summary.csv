@@ -1,0 +1,2 @@
+model,accuracy,exact_match_acc
+bert-base-ages_digits,0.24,0.15

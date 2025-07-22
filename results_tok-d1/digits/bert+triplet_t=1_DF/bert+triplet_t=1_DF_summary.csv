@@ -1,0 +1,2 @@
+model,accuracy,exact_match_acc
+bert+triplet_t=1_DF,0.55,0.41

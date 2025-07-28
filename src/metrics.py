@@ -1,7 +1,8 @@
 import numpy as np
-from typing import List, Tuple
+from typing import List, Tuple, Callable
 import re
 from word2number import w2n
+import random
 
 def _parse_age(sentence: str) -> int:
     """
@@ -45,3 +46,13 @@ def compute_errors(true: List[int], predicted: List[int], acceptable_range=2):
 
 
     return errors, correct, accuracy, signed_errors, exact_match_accuracy
+
+
+
+def make_query(corpus: List[str], base_idx: int | None = None) -> Tuple[str, int]:
+    if base_idx is None:
+        base_idx = random.randrange(len(corpus))
+
+    sentence = corpus[base_idx],
+
+    return sentence, base_idx

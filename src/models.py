@@ -9,7 +9,7 @@ class SentenceEncoder():
     def embed(self, text: List[str]):
         return self.model.encode(text)
 
-    def find_best_index(self, query: int, corpus_embedding):
+    def find_best_index(self, query, corpus_embedding):
         """
         Consider making the distance function a parameter, if useful,
             so you can use other like L2, etc. instead of just cos_sim or dot_score.

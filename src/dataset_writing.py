@@ -4,6 +4,7 @@ from typing import List, Callable, Tuple
 from num2words import num2words
 import ast
 import pandas as pd
+from itertools import islice
 
 
 N_ROWS = 100 # change to 1,000,000 later. right now with ages that make sense, 100 rows seems best for a small experiment. FOR NOW.
@@ -83,12 +84,22 @@ def clean_raw_data():
 
 
 def load_bigger_dataset(path: Path, row_num) -> List[str]:
+    """
+    :param path:
+    :param row_num: Write -1 for loading the full dataset.
+    :return:
+    """
     sentences = []
     with path.open(newline="") as f:
         reader = csv.reader(f)
         next(reader, None)
-        for row in reader:
-            sentences.append(row[row_num])
+        if row_num == -1:
+            for row in islice(reader, N_ROWS):
+                sentence = ", ".join(row)
+                sentences.append(sentence)
+        else:
+            for row in reader:
+                sentences.append(row[row_num])
 
     print("Number of sentences:", len(sentences))
     print(sentences[:10])

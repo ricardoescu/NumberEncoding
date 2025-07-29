@@ -1,0 +1,2 @@
+model,accuracy,exact_match_acc
+multi-qa-mpnet-base-cos-v1,0.2,0.15

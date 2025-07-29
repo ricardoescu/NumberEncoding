@@ -6,16 +6,18 @@ from itertools import islice
 import csv
 import random
 from models import SentenceEncoder
+from num2words import num2words
 
-def run_experiment(encoder, sentences, ages: range) -> dict:
+def run_experiment(encoder, sentences, ages: range, word_query: bool = False) -> dict:
 
     true_ages, pred_ages = [], []
     corpus_embedding = encoder.embed(sentences)
     for q in ages:
-        model_index = encoder.find_best_index(q, corpus_embedding)
-        #pred = int(sentences[model_index].split()[-1])
-        pred = _parse_age(sentences[model_index])
         true, true_index = failproof(q, sentences)
+        if word_query:
+            q = num2words(q)
+        model_index = encoder.find_best_index(q, corpus_embedding)
+        pred = _parse_age(sentences[model_index])
 
         true_ages.append(true)
         pred_ages.append(pred)

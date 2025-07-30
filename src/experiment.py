@@ -148,3 +148,34 @@ def run_experiment_full(encoder: SentenceEncoder, csv_path: Path, sentences: Lis
         "pred_sents": pred_sents,
         "accuracy": accuracy,
     }
+
+
+from src.metrics import _parse_age
+
+def gemini_experiment(encoder, sentences, ages: range, word_query: bool = False) -> dict:
+
+    true_ages, pred_ages = [], []
+    corpus_emb = encoder.embed(sentences)
+    for q in ages:
+        true, true_index = failproof(q, sentences)
+        if word_query:
+            q = num2words(q)
+        query_emb = encoder.embed(str(q))[0:1]
+        model_index = encoder.find_best_index(query_emb, sentences)
+        print(model_index)
+        pred = _parse_age(sentences[model_index])
+
+        true_ages.append(true)
+        pred_ages.append(pred)
+
+    errors, correct, accuracy, non_abs_errors, exact_match_accuracy = compute_errors(true_ages, pred_ages)
+
+    results = {
+        "true": true_ages,
+        "pred": pred_ages,
+        "errors": errors,
+        "correct": correct,
+        "accuracy": accuracy,
+        "full_error": non_abs_errors,
+        "exact_match_acc": exact_match_accuracy
+    }

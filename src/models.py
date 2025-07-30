@@ -23,3 +23,31 @@ class SentenceEncoder():
 
         best_idx = int(similarities.argmax())
         return best_idx
+
+from google import genai
+from google.genai import types
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
+
+from google import genai
+from google.genai import types
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
+
+
+class GeminiEncoder():
+    def __init__(self, model_name: str = "gemini-embedding-001"):
+        self.model = model_name
+        self.client = genai.Client(api_key='AIzaSyCHY6HWu2QwM-D6T9xBvW0--FuXziWvky4')
+
+    def embed(self, sent):
+        result = self.client.models.embed_content(model=self.model,
+                                                  contents=sent,
+                                                  config=types.EmbedContentConfig(task_type="SEMANTIC_SIMILARITY"))
+        return np.vstack([np.array(e.values, dtype=np.float32) for e in result.embeddings])
+
+    def find_best_index(self, query_emb, emb_corpus):
+        sims = cosine_similarity(query_emb, emb_corpus)
+
+        best_idx = int(np.argmax(sims))
+        return best_idx

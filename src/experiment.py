@@ -7,6 +7,7 @@ import csv
 import random
 from models import SentenceEncoder
 from num2words import num2words
+import re
 
 def run_experiment(encoder, sentences, ages: range, word_query: bool = False) -> dict:
 
@@ -59,7 +60,7 @@ def get_column_choices(path: Path) -> Tuple[List[str], Dict[str, List[str]]]:
                 if val: choices[col].add(val)
     return header, {col: sorted(vals) for col, vals in choices.items()}
 
-def edit_column(sentence: str, header: List[str], choices: Dict[str, List[str]], delimiter: str = ", the ") -> str:
+def edit_column(sentence: str, header: List[str], choices: Dict[str, List[str]], delimiter: str = ", the ", num_switch: bool = False) -> str:
     """
     Given one sentence built with all columns in "header",
     with 'delimiter' pick one column at random and replaces its value with
@@ -73,6 +74,31 @@ def edit_column(sentence: str, header: List[str], choices: Dict[str, List[str]],
     :param delimiter:
     :return:
     """
+    if num_switch:
+        pat = re.compile(r"\d+(?:\.\d+)?")# int or float
+        m = pat.search(sentence)
+        if not m:
+            print("No number found.")
+            return sentence
+
+        orig_str = m.group()
+        orig_val = int(float(orig_str))  # 65.0 -> 65
+
+        while True:
+            delta = random.randint(-50, 50)
+            if delta != 0:
+                break
+
+        new_val = max(0, orig_val + delta)
+
+        if "." in orig_str:
+            repl = f"{float(new_val):.1f}"
+        else:
+            repl = str(new_val)
+
+        # replace ONLY the first occurrence
+        return pat.sub(repl, sentence, count=1)
+
     raw = sentence.split(delimiter)
 
     parts = [raw[0]] + [f"the {p}" for p in raw[1:]]
@@ -95,7 +121,7 @@ def edit_column(sentence: str, header: List[str], choices: Dict[str, List[str]],
     parts[col_idx] = new_val
     return delimiter.join([parts[0]] + [p[len("the "):] for p in parts[1:]])
 
-def run_experiment_full(encoder: SentenceEncoder, csv_path: Path, sentences: List[str], max_queries: Optional[int] = None) -> Dict[str, List]:
+def run_experiment_full(encoder: SentenceEncoder, csv_path: Path, sentences: List[str], max_queries: Optional[int] = None, num_switch: bool = False) -> Dict[str, List]:
     header, choices = get_column_choices(csv_path)
 
 
@@ -106,7 +132,7 @@ def run_experiment_full(encoder: SentenceEncoder, csv_path: Path, sentences: Lis
 
     for i in range(N):
         gold.append(i)
-        query = edit_column(sentences[i], header, choices)
+        query = edit_column(sentences[i], header, choices, num_switch=num_switch)
         queries.append(query)
         p = encoder.find_best_index(query, corpus_embedding)
         pred.append(p)

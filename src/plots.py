@@ -295,3 +295,74 @@ def plot_line_2d(encoder, sentences, title_tag: str = "", label_points: bool = T
     plt.ylabel("PC-2");
     plt.tight_layout()
     plt.show()
+
+
+
+def plot_tsne_new(model_name, out_folder, query: str, sentences: List[str], encoder, pca_dims: int, perp: int, tsne_dimensions:int = 2, show_labels: bool = False):
+    numbers = list(range(100))
+    s_numbers = [str(i) for i in numbers]
+    emb_nums = encoder.embed(s_numbers)
+
+    emb_query = encoder.embed([str(query)][0])
+    #emb_query = encoder.embed(query_text)
+    num_sentence = [str(_parse_age(s)) for s in sentences]
+    emb_sentences = encoder.embed(sentences)
+    #emb_sentences = encoder.embed(num_sentence)
+
+    model_index = encoder.find_best_index(query, emb_sentences)
+
+    all_embeddings = np.vstack([emb_query, emb_sentences, emb_nums])
+
+    # Apply dimensionality reduction (optional, as it does not take that much time)
+    # Important to note! Models such as RoBERTa did take long. Gotta look more into if this actually makes it considerably better
+    # Dimensionality reduction did not affect the graphing much.
+    pca = PCA(n_components=pca_dims, random_state=42)
+    pca_transformed = pca.fit_transform(all_embeddings)
+
+    # Ensuring that perplexity is always within the limits of the shape.
+    perplexity = min(perp, pca_transformed.shape[0]-1)
+    #perplexity = min(perp, all_embeddings.shape[0] - 1)
+
+    tsne = TSNE(n_components=tsne_dimensions, perplexity=perplexity, random_state=42) # I think specifying the random state helps for replicability? I need to check again.
+    coords = tsne.fit_transform(pca_transformed)
+    #coords = tsne.fit_transform(all_embeddings)
+
+    query_coord = coords[0]
+    sentence_coords = coords[1:1 + len(sentences)]
+    #best_coords = coords[1 + len(sentences)]
+    all_num_coords = coords[1+len(sentences):]
+
+    ages = [_parse_age(s) for s in sentences]
+    numbers = list(range(len(all_num_coords)))
+
+    plt.figure(figsize=(6, 6))
+    # plot all sentences
+
+    sc1 = plt.scatter(sentence_coords[:, 0], sentence_coords[:, 1], c=ages, cmap='Blues', s=30, alpha=0.8, label='Sentences')
+    plt.colorbar(sc1, label='sentence age')
+
+    sc2 = plt.scatter(all_num_coords[:, 0], all_num_coords[:, 1], c=numbers, cmap='OrRd', s=20, alpha=0.6, marker=".", label='Numbers')
+    plt.colorbar(sc2, label='Number values')
+
+    if show_labels:
+        # label corpus sentence with their numeric age
+        for (x, y), age in zip(sentence_coords, ages):
+            plt.annotate(age, (x, y), textcoords="offset points", xytext=(2, 2), fontsize=6, color='navy')
+        # label the plain numbers 0-99
+        for (x, y), n in zip(all_num_coords, numbers):
+            plt.annotate(n, (x, y), textcoords="offset points", xytext=(2, 2), fontsize=6, color='darkred')
+
+    plt.scatter(*query_coord, marker='^', s=100, color='black', label=f"query=sentence")
+    plt.scatter(*sentence_coords[model_index], marker='X', s=120, color='red', label=f"model best={sentences[model_index].split()[-1]}")
+    #plt.scatter(*best_coords, marker='s', s=120, color='green', label=f"true best={true_age}")
+    plt.legend()
+
+    plt.title(f"{model_name} t-SNE projection")
+    plt.xlabel("TSNE-1")
+    plt.ylabel("TSNE-2")
+    plt.tight_layout()
+
+    filename = f"tsne_{model_name}.png"
+    plt.savefig(out_folder / filename)
+
+    plt.show()

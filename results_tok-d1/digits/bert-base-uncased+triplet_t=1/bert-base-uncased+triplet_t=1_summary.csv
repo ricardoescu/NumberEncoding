@@ -1,0 +1,2 @@
+model,accuracy,exact_match_acc
+bert-base-uncased+triplet_t=1,0.61,0.5

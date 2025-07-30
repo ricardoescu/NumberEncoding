@@ -1,0 +1,2 @@
+model,accuracy,exact_match_acc
+multi-qa-distilbert-cos-v1,0.89,0.78

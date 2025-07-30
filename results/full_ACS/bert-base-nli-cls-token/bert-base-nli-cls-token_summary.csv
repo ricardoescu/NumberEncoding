@@ -1,0 +1,2 @@
+model,accuracy
+bert-base-nli-cls-token,0.93
